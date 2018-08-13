@@ -239,6 +239,13 @@ set(SWIFT_ANDROID_DEPLOY_DEVICE_PATH "" CACHE STRING
   "Path on an Android device where build products will be pushed. These are used when running the test suite against the device")
 
 #
+# User-configurable BareMetal specific options.
+#
+
+set(SWIFT_BAREMETAL_TOOLCHAIN_PATH "" CACHE STRING
+  "Path to the directory with required toolchain (currently customized arm-none-eabi).")
+
+#
 # User-configurable ICU specific options for Android, FreeBSD, Linux and Haiku.
 #
 
@@ -705,9 +712,10 @@ if("${SWIFT_HOST_VARIANT_SDK}" STREQUAL "LINUX")
   is_sdk_requested(LINUX swift_build_linux)
   if(swift_build_linux)
     configure_sdk_unix("Linux" "${SWIFT_HOST_VARIANT_ARCH}")
-    set(SWIFT_PRIMARY_VARIANT_SDK_default  "${SWIFT_HOST_VARIANT_SDK}")
-    set(SWIFT_PRIMARY_VARIANT_ARCH_default "${SWIFT_HOST_VARIANT_ARCH}")
   endif()
+
+  set(SWIFT_PRIMARY_VARIANT_SDK_default  "${SWIFT_HOST_VARIANT_SDK}")
+  set(SWIFT_PRIMARY_VARIANT_ARCH_default "${SWIFT_HOST_VARIANT_ARCH}")
 
 elseif("${SWIFT_HOST_VARIANT_SDK}" STREQUAL "FREEBSD")
 
@@ -780,13 +788,6 @@ elseif("${SWIFT_HOST_VARIANT_SDK}" MATCHES "(OSX|IOS*|TVOS*|WATCHOS*)")
 
 endif()
 
-if("${SWIFT_PRIMARY_VARIANT_SDK}" STREQUAL "")
-  set(SWIFT_PRIMARY_VARIANT_SDK "${SWIFT_PRIMARY_VARIANT_SDK_default}")
-endif()
-if("${SWIFT_PRIMARY_VARIANT_ARCH}" STREQUAL "")
-  set(SWIFT_PRIMARY_VARIANT_ARCH "${SWIFT_PRIMARY_VARIANT_ARCH_default}")
-endif()
-
 # Should we cross-compile the standard library for Android?
 is_sdk_requested(ANDROID swift_build_android)
 if(swift_build_android AND NOT "${SWIFT_ANDROID_NDK_PATH}" STREQUAL "")
@@ -809,6 +810,17 @@ if(swift_build_windows AND NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   configure_sdk_windows("Windows" "msvc" "${SWIFT_SDK_WINDOWS_ARCHITECTURES}")
 endif()
 
+is_sdk_requested(BAREMETAL swift_build_baremetal)
+if(swift_build_baremetal)
+  configure_sdk_baremetal(BAREMETAL "BareMetal" "thumbv7m;thumbv7em" "${SWIFT_BAREMETAL_TOOLCHAIN_PATH}")
+endif()
+
+if("${SWIFT_PRIMARY_VARIANT_SDK}" STREQUAL "")
+  set(SWIFT_PRIMARY_VARIANT_SDK "${SWIFT_PRIMARY_VARIANT_SDK_default}")
+endif()
+if("${SWIFT_PRIMARY_VARIANT_ARCH}" STREQUAL "")
+  set(SWIFT_PRIMARY_VARIANT_ARCH "${SWIFT_PRIMARY_VARIANT_ARCH_default}")
+endif()
 if("${SWIFT_SDKS}" STREQUAL "")
   set(SWIFT_SDKS "${SWIFT_CONFIGURED_SDKS}")
 endif()

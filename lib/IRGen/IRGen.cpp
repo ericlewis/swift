@@ -153,6 +153,13 @@ swift::getIRTargetOptions(IRGenOptions &Opts, ASTContext &Ctx) {
   // Explicitly request debugger tuning for LLDB which is the default
   // on Darwin platforms but not on others.
   TargetOpts.DebuggerTuning = llvm::DebuggerKind::LLDB;
+  TargetOpts.DataSections = Opts.DataSections;
+  TargetOpts.FunctionSections = Opts.FunctionSections;
+
+  if (Opts.MetadataSections) {
+    // TODO: Baremetal
+    TargetOpts.ExceptionModel = llvm::ExceptionHandling::None;
+  }
 
   auto *Clang = static_cast<ClangImporter *>(Ctx.getClangModuleLoader());
   clang::TargetOptions &ClangOpts = Clang->getTargetInfo().getTargetOpts();
